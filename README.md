@@ -217,3 +217,7 @@ At this point, you can start writing SQL queries to ask interesting questions. Y
 * In addition to the simpler, business-friendly interface for asking questions, Superset also provides a [SQL IDE](http://airbnb.io/superset/sqllab.html) for running more complex SQL queries, making it easy to turn the results into a visualization or dashboard.
 
 To setup a test Superset instance, see the [installation instructions](http://airbnb.io/superset/installation.html) and [tutorial](http://airbnb.io/superset/tutorial.html).
+
+## Sources
+
+Menne, Matthew J., Imke Durre, Bryant Korzeniewski, Shelley McNeal, Kristy Thomas, Xungang Yin, Steven Anthony, Ron Ray, Russell S. Vose, Byron E.Gleason, and Tamara G. Houston (2012): Global Historical Climatology Network - Daily (GHCN-Daily), Version 3. 2015 Daily Data. NOAA National Climatic Data Center. doi:10.7289/V5D21VHZ, Accessed on 2016-12-30.
