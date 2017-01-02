@@ -1,12 +1,20 @@
 # Processing Daily Weather Data
 
-The NOAA (National Oceanic and Atmospheric Adminstration) aggregates world-wide, daily weather data and [exposes it](https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00861) for researchers on an [FTP server](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/). 
+The NOAA (National Oceanic and Atmospheric Adminstration) aggregates world-wide, daily weather data and [exposes it](https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00861) for researchers on an [FTP server](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/). They refer to the network of weather stations as the Global Historical Climatology Network.
 
-Here, I run through an example of how to download, process, and ingest data for a full year (2015). I also join the weather data with station metadata in a [PostgreSQL](https://www.postgresql.org/) database.
+Here, I run through how to:
+
+* Download the 2015 weather data and metadata from the NOAA FTP server
+* Examine the data using Unix command line utilities
+* Process the data using the Pandas data analysis Python library in a Jupyter notebook
+* Ingest the data into a PostgreSQL database using Pandas
+* Denormalize the data in PostgreSQL, preparing the data for analysis in Superset
+
+Much of the processing and analysis of the data could be done with a single tool, e.g. Pandas. Here, the goal is to highlight diverse tools data scientists can use to manipulate and analyze this dataset.
 
 ## Audience
 
-You're learning data science techniques and want to familiarize yourself with some of the basic tools for fetching, processing, and ingesting data. I'll review simple Unix command line tools, the pandas data analysis Python library, Jupyter notebooks, and PostgreSQL.
+You're learning data science techniques and want to familiarize yourself with some of the basic tools for fetching, processing, and ingesting data. If you're unfamiliar with any of the above steps or tools, this guide is for you!
 
 ## Understanding the data, getting the data we need
 
@@ -84,15 +92,16 @@ How you install PostgreSQL will vary depending on your system. Please consult th
 
 Record the password for the weather\_read\_only user somewhere secure for later use.
 
-## Processing the data for ingestion into PostgreSQL
+## Loading the data into PostgreSQL
 
 Both the weather data and station metadata require a bit of processing before ingesting them into PostgreSQL, namely:
 
 * The date of measurement needs to be read into the database as a date, not a string.
 * We only want to ingest a subset of the measurements, keeping precipitation, snowfall, and temperature readings, but removing more esoteric measures.
 * The _ghcnd-stations.txt_ file delimits columns by multiple spaces, which can be difficult to parse correctly. Missing data is recorded with custom values (e.g. missing elevation is recorded as -999.9), but we want to correctly note those values as missing.
+* The weather types in the data file are difficult for humans to interpret (a new user might not know what 'PRCP' refers to). We want to attach a human-readable description to these measurements.
 
-Python provides better tools than Unix utilities for processing data like this. Specifically, we'll use the [pandas](http://pandas.pydata.org/) library to do most of the heavy lifting.
+Python provides better tools than Unix utilities for processing data like this. Specifically, we'll use the [Pandas](http://pandas.pydata.org/) library to do most of the heavy lifting.
 
 You can find the code in [this Jupyter notebook](Ingest_Data_Into_PostgreSQL.ipynb). All the requirements for running this code are in the _requirements.txt_ file. It's recommended you create a new Python [virtual environment](http://docs.python-guide.org/en/latest/dev/virtualenvs/), and run
 
@@ -103,6 +112,95 @@ to install the necessary modules. Then open the notebook:
     jupyter notebook Ingest_Data_Into_PostgreSQL.ipynb
 
 and run the code from there.
+
+## Denormalizing the data and metadata, creating database indexes, separating data for specific weather types as views
+
+To ask meaningful questions, we'll want to join data from all three of our data tables. If we join these tables consistently, it might make sense to [denormalize](https://en.wikipedia.org/wiki/Denormalization) our table design, keeping the data and metadata in a _single table_. Moreover, some tools - like Superset - cannot perform database joins, and so require that any data we want to analyze at the same time be in a single table.
+
+Specifically, our new, "denormalized" table might have the following fields:
+
+    station_identifier
+    measurement_date
+    measurement_type
+    weather_description
+    measurement_flag
+    latitude
+    longitude
+    elevation
+
+To create this unified table from our three existing tables, we can issue this query from `psql`:
+
+    CREATE TABLE weather_data_denormalized AS 
+        SELECT wd.station_identifier, 
+               wd.measurement_date, 
+               wd.measurement_type, 
+               wt.weather_description, 
+               wd.measurement_flag, 
+               sm.latitude, 
+               sm.longitude, 
+               sm.elevation 
+        FROM weather_data wd 
+        JOIN station_metadata sm 
+            ON wd.station_identifier = sm.station_id 
+        JOIN weather_types wt 
+            ON wd.measurement_type = wt.weather_type;
+
+We now have data in a single table, but we can still improve the performance of our queries. Let's create some [database indexes](https://www.postgresql.org/docs/9.1/static/sql-createindex.html) on some of the fields in this table. Indexes will help PostgreSQL optimize our queries by querying only the set of records with a field that holds a specific value. For instance, let's say we only want to review the data recorded on 2015-01-01. We'd attach a filter to our query like so:
+
+    WHERE measurement_date = '2015-01-01'
+
+Without an index, PostgreSQL has to scan all the records of our table, _then_ filter on the ones tied to that date, returning the result. _With_ an index, Postgres will know exactly where to find the records we're interested in, immediately returning the set we want **without having to execute a full table scan**. Let's review how to create an index on the `measurement_date` field and see how it speeds up performance.
+
+Without the index, here's how quickly we can retrieve the count of records with data on 2015-01-01:
+
+    weather=# \timing
+    Timing is on.
+    weather=# SELECT COUNT(*) FROM weather_data_denormalized WHERE measurement_date = '2015-01-01';
+    count
+    -------
+    73355
+    (1 row)
+
+    Time: 2463.825 ms
+
+This takes roughly 2.5 seconds. Now, let's create an index:
+
+    weather=# CREATE INDEX date_index ON weather_data_denormalized (measurement_date);
+    CREATE INDEX
+
+... and see how quickly we can retrieve the same count as above:
+    
+    weather=# SELECT COUNT(*) FROM weather_data_denormalized WHERE measurement_date = '2015-01-01';
+    count
+    -------
+    73355
+    (1 row)
+
+    Time: 22.933 ms
+    
+It's magic!
+
+On what fields should we create indexes? **If you'd filter on the field in a `WHERE` clause, you should create an index on the field**. Here, we'll likely be filtering on _measurement\_date_, _measurement\_type_, _weather\_description_, _measurement\_flag_, and _elevation_. Let's create indexes for all of the remaining fields:
+
+    weather=# CREATE INDEX type_index ON weather_data_denormalized (measurement_type);
+    CREATE INDEX
+    weather=# CREATE INDEX description_index ON weather_data_denormalized (weather_description);
+    CREATE INDEX
+    weather=# CREATE INDEX flag_index ON weather_data_denormalized (measurement_flag);
+    CREATE INDEX
+    weather=# CREATE INDEX elevation_index ON weather_data_denormalized (elevation);
+    CREATE INDEX
+
+This will take some time to complete.
+
+Finally, it's possible we might want to logically separate rainfall, snow, and temperate data, since the measurements are on different scales, and we're likely to ask different questions of each. We can use [database views](https://www.postgresql.org/docs/9.2/static/sql-createview.html) to separate these data. This gives the illusion that these data live in separate tables, where queries against the views really all run against the weather\_data\_denormalized_ table. Let's review how to create and query these views:
+
+    weather=# CREATE VIEW precipitation_data AS SELECT * FROM weather_data_denormalized WHERE measurement_type = 'PRCP';
+    CREATE VIEW
+    weather=# SELECT COUNT(*) FROM precipitation_data;
+    count
+    ----------
+    10192164
 
 At this point, you can start writing SQL queries in Postgres to ask interesting questions. You can even play around more with the code in the Jupyter notebook, slicing and dicing the data with Python. But if you want to enable normal users to derive insights, you'll need other tools.
 
