@@ -87,8 +87,6 @@ How you install PostgreSQL will vary depending on your system. Please consult th
     CREATE ROLE
     weather=# create schema weather;
     CREATE SCHEMA
-    weather=# grant select on all tables in schema weather to weather_read_only;
-    GRANT
 
 Record the password for the weather\_read\_only user somewhere secure for later use.
 
@@ -193,7 +191,7 @@ On what fields should we create indexes? **If you'd filter on the field in a `WH
 
 This will take some time to complete.
 
-Finally, it's possible we might want to logically separate rainfall, snow, and temperate data, since the measurements are on different scales, and we're likely to ask different questions of each. We can use [database views](https://www.postgresql.org/docs/9.2/static/sql-createview.html) to separate these data. This gives the illusion that these data live in separate tables, where queries against the views really all run against the weather\_data\_denormalized_ table. Let's review how to create and query these views:
+It's possible we might want to logically separate rainfall, snow, and temperate data, since the measurements are on different scales, and we're likely to ask different questions of each. We can use [database views](https://www.postgresql.org/docs/9.2/static/sql-createview.html) to separate these data. This gives the illusion that these data live in separate tables, where queries against the views really all run against the weather\_data\_denormalized_ table. Let's review how to create and query these views:
 
     weather=# CREATE VIEW precipitation_data AS SELECT * FROM weather_data_denormalized WHERE measurement_type = 'PRCP';
     CREATE VIEW
@@ -202,7 +200,12 @@ Finally, it's possible we might want to logically separate rainfall, snow, and t
     ----------
     10192164
 
-At this point, you can start writing SQL queries in Postgres to ask interesting questions. You can even play around more with the code in the Jupyter notebook, slicing and dicing the data with Python. But if you want to enable normal users to derive insights, you'll need other tools.
+Finally, after we've loaded and created the new tables and views, we'll need to grant the weather\_read\_only user permission to execute SELECT statements on the data:
+
+    weather=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO weather_read_only
+    GRANT
+
+At this point, you can start writing SQL queries to ask interesting questions. You can even play around more with the code in the Jupyter notebook, slicing and dicing the data with Python. But if you want to enable "normal" users (people who don't know how to write code) to derive insights, you'll need other tools.
 
 ## Configuring Superset
 
