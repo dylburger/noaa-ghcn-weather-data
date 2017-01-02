@@ -1,6 +1,6 @@
 # Processing Daily Weather Data
 
-The NOAA (National Oceanic and Atmospheric Adminstration) aggregates world-wide, daily weather data and [exposes it](https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00861) for researchers on an [FTP server](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/). They refer to the network of weather stations as the Global Historical Climatology Network.
+The NOAA (National Oceanic and Atmospheric Adminstration) aggregates world-wide, daily weather data and [exposes it](https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00861) for researchers on an [FTP server](http://bit.ly/2hKP5Kw). They refer to the network of weather stations as the Global Historical Climatology Network.
 
 Here, I run through how to:
 
@@ -18,14 +18,14 @@ You're learning data science techniques and want to familiarize yourself with so
 
 ## Understanding the data, getting the data we need
 
-The FTP server provides a [high-level README](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/readme.txt) that shows us where to get the data we need (all data from 2015), and points us to the metadata files we'll need to understand where the observations were recorded. 
+The FTP server provides a [high-level README](http://bit.ly/2hKOKry) that shows us where to get the data we need (all data from 2015), and points us to the metadata files we'll need to understand where the observations were recorded.
 
 To get a global picture of day-by-day weather data in 2015, with the (lat, long) of all observations, we'll need to download the following:
 
-* The [2015 data](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/2015.csv.gz), which you can find in the `by_year` subdirectory.
-* The [metadata for weather stations](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/ghcnd-stations.txt), which includes the (lat, long) of the station.
+* The [2015 data](http://bit.ly/2j0CEMO), which you can find in the `by_year` subdirectory.
+* The [metadata for weather stations](http://bit.ly/2j0LkTb), which includes the (lat, long) of the station.
 
-The high-level README above describes the fields in the station metadata. Separately, [this README](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/readme.txt) and [this README](ftp://ftp.ncdc.noaa.gov/pub/data/ghcn/daily/by_year/ghcn-daily-by_year-format.rtf) describe the fields included in the daily-level 2015 data.
+The high-level README above describes the fields in the station metadata. Separately, [this README](http://bit.ly/2ivSmMU) and [this README](http://bit.ly/2iBswJL) describe the fields included in the daily-level 2015 data.
 
 ## Downloading the data
 
