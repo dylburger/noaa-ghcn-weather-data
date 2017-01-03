@@ -216,6 +216,8 @@ At this point, you can start writing SQL queries to ask interesting questions. Y
 * Superset effectively combines the best of tools like Tableau and Excel. Tableau enables you to create beautiful visualizations from data in centralized databases, but fails to give you the rich power of a pivot table. Excel lets you ask and answer more abstract business questions, but lacks powerful visualizations, and the results are typically saved locally, not shared with the whole business. Superset provides a central platform for data exploration, enabling people to ask general questions, visualize the results, and share that with the business in an easy way.
 * In addition to the simpler, business-friendly interface for asking questions, Superset also provides a [SQL IDE](http://airbnb.io/superset/sqllab.html) for running more complex SQL queries, making it easy to turn the results into a visualization or dashboard.
 
+It's also important to note that Superset is immature, and actively being changed and developed. [A number of other tools](https://docs.google.com/spreadsheets/d/1j9zX0xF9QB79HMCCrM3PKyMR8qQmZ2IpMa_iKLaY_MA/edit#gid=0) provide similar interfaces to business users, or friendly SQL IDEs from which you can create dashboard and visualizations.
+
 To setup a test Superset instance, see the [installation instructions](http://airbnb.io/superset/installation.html) and [tutorial](http://airbnb.io/superset/tutorial.html).
 
 ## Sources
