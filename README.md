@@ -2,7 +2,7 @@
 
 The NOAA (National Oceanic and Atmospheric Adminstration) aggregates world-wide, daily weather data and [exposes it](https://gis.ncdc.noaa.gov/geoportal/catalog/search/resource/details.page?id=gov.noaa.ncdc:C00861) for researchers on an [FTP server](http://bit.ly/2hKP5Kw). They refer to the network of weather stations as the Global Historical Climatology Network.
 
-Here, I run through how to:
+Below, I run through how to:
 
 * Download the 2015 weather data and metadata from the NOAA FTP server
 * Examine the data using Unix command line utilities
@@ -10,7 +10,7 @@ Here, I run through how to:
 * Ingest the data into a PostgreSQL database using Pandas
 * Denormalize the data in PostgreSQL, preparing the data for analysis in Superset
 
-Much of the processing and analysis of the data could be done with a single tool, e.g. Pandas. Here, the goal is to highlight diverse tools data scientists can use to manipulate and analyze this dataset.
+Much of the processing and analysis of the data could be done with a single tool, e.g. Pandas. The goal here is to highlight the diversity of tools data scientists can use to manipulate and analyze this dataset.
 
 ## Audience
 
