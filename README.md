@@ -38,6 +38,10 @@ You can download the data from the FTP server with cURL:
 
 `curl -O` will save the file with the filename as it reads on the server (e.g. _2015.csv.gz_).
 
+After downloading the data, you'll want to `gunzip` it:
+
+    gunzip 2015.csv.gz
+
 ## Examining the data
 
 We saw roughly 34 million weather observations in 2015:
