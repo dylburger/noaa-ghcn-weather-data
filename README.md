@@ -206,19 +206,19 @@ It's possible we might want to logically separate rainfall, snow, and temperate 
 
 Finally, after we've loaded and created the new tables and views, we'll need to grant the weather\_read\_only user permission to execute SELECT statements on the data:
 
-    weather=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO weather_read_only
+    weather=# GRANT SELECT ON ALL TABLES IN SCHEMA public TO weather_read_only;
     GRANT
 
 At this point, you can start writing SQL queries to ask interesting questions. You can even play around more with the code in the Jupyter notebook, slicing and dicing the data with Python. But if you want to enable "normal" users (people who don't know how to write code) to derive insights, you'll need other tools.
 
 ## Configuring Superset
 
-[Superset](https://github.com/airbnb/superset) is a general "ad hoc analysis" tool that enables an average user to ask complex questions of a dataset without writing a line of code. Typically, users might do this type of analysis in Excel, or Tableau, but Superset has benefits those tools don't:
+[Superset](https://github.com/apache/incubator-superset) is a general "ad hoc analysis" tool that enables an average user to ask complex questions of a dataset without writing a line of code. Typically, users might do this type of analysis in Excel, or Tableau, but Superset has benefits those tools don't:
 
 * It's free and open source.
 * Its data modeling layer centralizes the definitions for measures and dimensions. Metric are defined in one place, with one formula. When individuals keep this logic in Excel, they might define metrics inconsistently. This causes confusion for the business.
 * Superset effectively combines the best of tools like Tableau and Excel. Tableau enables you to create beautiful visualizations from data in centralized databases, but fails to give you the rich power of a pivot table. Excel lets you ask and answer more abstract business questions, but lacks powerful visualizations, and the results are typically saved locally, not shared with the whole business. Superset provides a central platform for data exploration, enabling people to ask general questions, visualize the results, and share that with the business in an easy way.
-* In addition to the simpler, business-friendly interface for asking questions, Superset also provides a [SQL IDE](http://airbnb.io/superset/sqllab.html) for running more complex SQL queries, making it easy to turn the results into a visualization or dashboard.
+* In addition to the simpler, business-friendly interface for asking questions, Superset also provides a [SQL IDE](https://superset.incubator.apache.org/sqllab.html) for running more complex SQL queries, making it easy to turn the results into a visualization or dashboard.
 
 Data scientists also benefit from ad hoc analysis tools in two key ways:
 
@@ -227,7 +227,7 @@ Data scientists also benefit from ad hoc analysis tools in two key ways:
 
 It's also important to note that Superset is immature, and actively being changed and developed. Other tools provide similar interfaces to business users, or friendly SQL IDEs from which you can create dashboards and visualizations. Please see [this comparison of tools](https://docs.google.com/spreadsheets/d/1j9zX0xF9QB79HMCCrM3PKyMR8qQmZ2IpMa_iKLaY_MA/) to help assess whether Superset is ideal for you.
 
-To setup a test Superset instance, see the [installation instructions](http://airbnb.io/superset/installation.html) and [tutorial](http://airbnb.io/superset/tutorial.html).
+To setup a test Superset instance, see the [installation instructions](https://superset.incubator.apache.org/installation.html) and [tutorial](https://superset.incubator.apache.org/tutorial.html).
 
 ## Sources
 
